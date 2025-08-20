@@ -2,6 +2,8 @@ import dotenv from "dotenv";
 dotenv.config();
 import cors from "cors";
 import express, { Application, NextFunction, Request, Response } from "express";
+import AuthRouter from "./routers/auth.router";
+import BlogRouter from "./routers/blog.router";
 
 const PORT: string = process.env.PORT || "8181";
 
@@ -24,6 +26,12 @@ class App {
     this.app.get("/", (req: Request, res: Response) => {
       res.status(200).send("<h1>Classbase API</h1>");
     });
+
+    // define route
+    const authRouter: AuthRouter = new AuthRouter();
+    const blogRouter: BlogRouter = new BlogRouter();
+    this.app.use("/auth", authRouter.getRouter());
+    this.app.use("/blog", blogRouter.getRouter());
   }
 
   private errorHandler(): void {
