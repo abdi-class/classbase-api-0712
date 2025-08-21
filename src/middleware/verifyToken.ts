@@ -16,7 +16,12 @@ export const verifyToken = (
 
     res.locals.decript = checkToken;
     next(); // forward to controller
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    console.log("error token", error.message);
+    if (error.message === "jwt expired") {
+      next({ success: false, code: 400, message: "Your token is expired" });
+    } else {
+      next(error);
+    }
   }
 };
