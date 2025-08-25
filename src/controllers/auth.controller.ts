@@ -6,25 +6,13 @@ import { createToken } from "../utils/createToken";
 import { verify } from "jsonwebtoken";
 import { transport } from "../config/nodemailer";
 import { cloudinaryUpload } from "../config/cloudinary";
+import { loginService, registerService } from "../service/auth.service";
+import logger from "../utils/logger";
 
 class AuthController {
   public async register(req: Request, res: Response, next: NextFunction) {
     try {
-      const account = await prisma.accounts.create({
-        data: { ...req.body, password: await hashPassword(req.body.password) },
-      });
-
-      const token = createToken(account, "3m");
-
-      await transport.sendMail({
-        from: process.env.MAIL_SENDER,
-        to: req.body.email,
-        subject: "Registration success",
-        html: `<div>
-        <p>Your account is created, verify your email</p>
-        <a href="${process.env.FE_URL}/verify/${token}" target="_blank">Verify Account</a>
-        </div>`,
-      });
+      await registerService(req.body);
 
       res.status(200).send({
         success: true,
@@ -36,28 +24,16 @@ class AuthController {
   }
   public async login(req: Request, res: Response, next: NextFunction) {
     try {
-      const account = await prisma.accounts.findUnique({
-        where: {
-          email: req.body.email,
-        },
-      });
-      if (!account) {
-        throw { success: false, message: "Account is not exist" };
-      }
-
-      // Validate password
-      const comparePass = await compare(req.body.password, account.password);
-      if (!comparePass) {
-        throw { message: "Password wrong" };
-      }
-
-      const token = createToken(account, "24h");
+      logger.info(
+        `${req.method} ${req.path}: incoming data ${JSON.stringify(req.body)}`
+      );
+      const { email, role, token } = await loginService(req.body);
 
       res.status(200).send({
         success: true,
         account: {
-          email: account.email,
-          role: account.role,
+          email,
+          role,
           token,
         },
       });

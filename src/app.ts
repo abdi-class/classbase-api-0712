@@ -4,6 +4,7 @@ import cors from "cors";
 import express, { Application, NextFunction, Request, Response } from "express";
 import AuthRouter from "./routers/auth.router";
 import BlogRouter from "./routers/blog.router";
+import logger from "./utils/logger";
 
 const PORT: string = process.env.PORT || "8181";
 
@@ -37,7 +38,9 @@ class App {
   private errorHandler(): void {
     this.app.use(
       (error: any, req: Request, res: Response, next: NextFunction) => {
-        console.log(error);
+        logger.error(
+          `${req.method} ${req.path}: ${error.message} ${JSON.stringify(error)}`
+        );
         res.status(error.code || 500).send(error);
       }
     );
