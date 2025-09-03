@@ -8,7 +8,9 @@
   "main": "src/index.ts",
   "scripts": {
     "test": "jest",
-    "dev": "nodemon src/index.ts"
+    "dev": "nodemon src/index.ts",
+    "start": "nodemon src/index.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",
